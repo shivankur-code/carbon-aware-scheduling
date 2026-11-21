@@ -1,0 +1,22 @@
+# T4 (Azure NC4as_T4_v3, spot): older generation (2018). 16 GB, no bf16 -> fp16, 1.5B model.
+# T4 power limit range is narrow (about 60-70 W), so caps clamp at the minimum.
+gpus: [0]
+port: 8000
+server:
+  extra_args: ["--gpu-memory-utilization", "0.90", "--max-model-len", "4096", "--dtype", "half"]
+  ready_timeout_s: 3600
+slo: {ttft_s: 2.0, tpot_s: 0.10}
+workload: {input_median: 512, input_max: 2048, output_median: 256, output_max: 1024}
+experiments:
+  - {type: idle, model: Qwen/Qwen2.5-1.5B-Instruct, duration_s: 120, settle_s: 30}
+  - {type: coldstart, model: Qwen/Qwen2.5-1.5B-Instruct, repeats: 3}
+  - type: load
+    name: g1_1p5b
+    models: [Qwen/Qwen2.5-1.5B-Instruct]
+    tp: [1]
+    caps: [1.0, 0.93, 0.86]
+    loads: [{concurrency: 1}, {concurrency: 16}, {concurrency: 64}]
+    warmup_s: 90
+    duration_s: 240
+  - {type: fault, model: Qwen/Qwen2.5-1.5B-Instruct, kill_at_s: 120, duration_s: 420,
+     load: {rate: 2.0}}

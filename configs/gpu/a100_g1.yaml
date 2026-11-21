@@ -1,0 +1,29 @@
+# A100 (Azure NC24ads_A100_v4, spot). Main power-cap curve + cross-generation model.
+gpus: [0]
+port: 8000
+server:
+  extra_args: ["--gpu-memory-utilization", "0.90", "--max-model-len", "8192"]
+  ready_timeout_s: 3600
+slo: {ttft_s: 2.0, tpot_s: 0.10}
+workload: {input_median: 512, input_max: 4096, output_median: 256, output_max: 1024}
+experiments:
+  - type: load
+    name: g1_7b
+    models: [Qwen/Qwen2.5-7B-Instruct]
+    tp: [1]
+    caps: [1.0, 0.9, 0.8, 0.7, 0.6, 0.5]
+    loads: [{concurrency: 1}, {concurrency: 16}, {concurrency: 64}]
+    warmup_s: 90
+    duration_s: 240
+  - {type: idle, model: Qwen/Qwen2.5-7B-Instruct, duration_s: 120, settle_s: 30}
+  - {type: coldstart, model: Qwen/Qwen2.5-7B-Instruct, repeats: 3}
+  - {type: fault, model: Qwen/Qwen2.5-7B-Instruct, kill_at_s: 120, duration_s: 420,
+     load: {rate: 2.0}}
+  - type: load
+    name: g1_1p5b
+    models: [Qwen/Qwen2.5-1.5B-Instruct]   # same model as the T4 run -> cross-generation
+    tp: [1]
+    caps: [1.0, 0.8, 0.6]
+    loads: [{concurrency: 1}, {concurrency: 16}, {concurrency: 64}]
+    warmup_s: 90
+    duration_s: 240
