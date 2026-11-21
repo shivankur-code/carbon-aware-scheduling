@@ -1,0 +1,16 @@
+# 10-minute smoke test on any single GPU. Run with --quick.
+gpus: [0]
+port: 8000
+server:
+  extra_args: ["--gpu-memory-utilization", "0.85", "--max-model-len", "4096"]
+  ready_timeout_s: 1800
+slo: {ttft_s: 2.0, tpot_s: 0.10}
+workload: {input_median: 256, input_max: 1024, output_median: 128, output_max: 512}
+experiments:
+  - {type: idle, model: Qwen/Qwen2.5-0.5B-Instruct, duration_s: 20, settle_s: 5}
+  - {type: coldstart, model: Qwen/Qwen2.5-0.5B-Instruct, repeats: 1}
+  - type: load
+    models: [Qwen/Qwen2.5-0.5B-Instruct]
+    tp: [1]
+    caps: [1.0, 0.7]
+    loads: [{concurrency: 8}]

@@ -18,3 +18,8 @@ used in sensitivity analysis. The pilot values are all placeholders.
 | Pool size | 64 GPUs | ASSUMPTION | 8–512 | Deployment granularity |
 | Availability target | 99.9% | ASSUMPTION | 99–99.99% | SLO practice |
 | Independent failures | yes | ASSUMPTION (known false) | beta-binomial correlation | Rack/power-domain correlation is planned |
+| Power-cap curve (throughput, power, temperature vs cap) | placeholder `PLACEHOLDER_CURVE` | ASSUMPTION → **measure with G1** | caps 50–100% | `gpu_bench` |
+| Spare idle power | 0.10 kW | ASSUMPTION → **measure with G3 idle** | | `gpu_bench` |
+| Software-failure repair time | part of MTTR | ASSUMPTION → **measure with G3 coldstart/fault** | | `gpu_bench` |
+| Failure blast radius (pool granularity) | 64 GPUs, independent | ASSUMPTION → **G2**: one failure takes out a whole TP group | TP 1–8 | `gpu_bench` |
+| Arrhenius activation energy Ea | 0, 0.3, 0.7 eV | ASSUMPTION (cannot be measured in hours) | 0–1.0 eV; 0 = no thermal aging | Reliability-physics literature (find and verify sources) |

@@ -1,13 +1,14 @@
 [project]
 name = "calf"
-version = "0.0.1"
+version = "0.0.2"
 description = "Reliability- and uncertainty-aware carbon planning for LLM inference fleets"
 requires-python = ">=3.11"
 dependencies = ["numpy>=1.26", "scipy>=1.11", "matplotlib>=3.8", "pyyaml>=6"]
 
 [project.optional-dependencies]
 opt = ["pulp>=2.8", "highspy>=1.7"]
-dev = ["pytest>=8", "ruff>=0.5"]
+gpu = ["vllm", "nvidia-ml-py", "aiohttp"]
+dev = ["pytest>=8", "ruff>=0.5", "aiohttp"]
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -17,7 +18,7 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 testpaths = ["tests"]
 
 [tool.ruff]

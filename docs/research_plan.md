@@ -5,7 +5,25 @@ uncertainty-aware lifetime planning for LLM inference fleets*
 
 **One-sentence pitch:** Carbon-aware inference design says to keep hardware longer on clean
 grids. We show what happens to that advice once hardware wears out, spares cost embodied
-carbon, and every input (embodied carbon, grid intensity, failure rates) is uncertain.
+carbon, and every input (embodied carbon, grid intensity, failure rates) is uncertain. We
+then show that **one operational knob, the GPU power cap, acts on all four carbon terms at
+once**, with the effects measured on real GPUs.
+
+## 0. The core idea: one knob, four carbon effects
+
+| Effect of lowering the power cap | Carbon term | Measured or modeled |
+|---|---|---|
+| Lower power, lower energy per token (if throughput drops less than power) | Operational ↓ | **Measured** (G1) |
+| Lower throughput, so more GPUs are needed | Embodied ↑ | **Measured** (G1) |
+| Lower temperature, slower wear-out, longer viable lifetime | Embodied ↓ (amortized), spares ↓ | Temperature **measured**; temperature-to-aging via Arrhenius (Ea swept from 0) |
+| Freed power headroom the grid can call on | Grid flexibility | Modeled (RQ5) |
+
+EcoServe chooses *which* hardware to provision and *how long* to keep it. This work adds
+*how hard to run it*, and shows that this choice cannot be separated from lifetime: the
+carbon-optimal (cap, lifetime) pair depends on the grid. Pilot (placeholder curve,
+`docs/figures/derating.png`): on dirty grids the cap pays for itself through energy
+efficiency; on clean grids it pays off mainly by extending lifetime, and only if thermal
+aging is real (Ea > 0). The measured curve decides how large each regime is.
 
 ---
 
@@ -109,6 +127,27 @@ first case to test.
 | E6 | Model validation: analytic vs simulated spares and availability | Credibility |
 | E7 (stretch) | Dependable demand-response relief vs SLO | RQ5 |
 
+## 6b. GPU measurement campaign (`gpu_bench/`)
+
+Each campaign replaces model assumptions with measurements. One command per campaign,
+results committed to `data/measurements/gpu/<gpu>_<date>/`.
+
+| ID | Config | Measures | Replaces assumption | GPU need | Est. time |
+|---|---|---|---|---|---|
+| G0 | `g0_smoke.yaml --quick` | Harness works, power capping permitted | none | any 1 GPU | 10 min |
+| G1 | `g1_powercap.yaml` | Throughput, power, temperature, SM clock, TTFT/TPOT, SLO attainment, J/token vs power cap (50–100%) at 4 load levels | Cap curve (tau, rho, T), active power | 1 GPU; **repeat on each generation available** (e.g. T4/V100, A10/A100, L4/L40S, H100) | about 3 h per GPU type |
+| G1x | G1 on older vs newer GPUs | perf/W across generations; how much efficiency an older GPU gives up | Doubling period; "keep old GPU vs buy new" | as many types as possible | about 3 h each |
+| G2 | `g2_tp_blast_radius.yaml` | Efficiency vs tensor-parallel degree; TP degree = failure blast radius | Pool size and failure domain in the spare model | 4–8 GPU node | about 3 h |
+| G3 | `g3_reliability.yaml` | Idle power (no process / model loaded), cold-start time, kill-and-restart downtime and lost requests under load | Spare idle power, software-failure MTTR | 1 GPU | about 30 min |
+
+**What makes this new:** EcoServe and others profile performance and power. As far as we
+know (to verify), no study links measured power-cap curves, temperature, failure blast
+radius and recovery time to a *lifetime and spares* carbon model.
+
+Measurement integrity: record GPU model, driver, vLLM version, cooling and ambient where
+known (`env.json`); repeat at least one configuration to estimate run-to-run noise;
+report GPU-only energy, adding host energy as a modeled term.
+
 ## 7. Data (public only; record source and licence for each in `data/README.md`)
 
 * **Grid carbon intensity:** Electricity Maps open historical data, UK Carbon Intensity
@@ -127,6 +166,7 @@ first case to test.
 | Week | Output | Done when |
 |---|---|---|
 | 0 (now) | Repo scaffold, pilot model, pilot figure, this plan | Tests pass; pilot reproduces from one command |
+| 1 (GPU) | G0 smoke + G3 + G1 on the first GPU type | Measured cap curve replaces the placeholder in `derating.png` |
 | 1 | Verify EcoServe/CarbonClarity details from the PDFs (`docs/related_work.md`); collect failure-rate sources; host+GPU asymmetric model | Every parameter in `docs/assumptions.md` has a source or ASSUMPTION tag |
 | 2 | E1, E2, E5 with sourced parameters | Phase diagram + host/GPU figure |
 | 3 | Uncertainty module (fuzzy + scenario) → E3 | Promised vs realized numbers |

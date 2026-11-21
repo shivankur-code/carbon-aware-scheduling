@@ -6,3 +6,4 @@ __pycache__/
 results/
 data/raw/
 *_HANDOFF*.md
+data/measurements/gpu/**/server.log

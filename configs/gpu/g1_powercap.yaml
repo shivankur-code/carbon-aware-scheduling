@@ -1,0 +1,18 @@
+# G1: power-cap curve (throughput, power, temperature, latency vs cap) at several loads.
+# About 6 caps x 4 loads x 7 min = about 3 h per model. Run on EVERY GPU type you can get:
+# the cross-generation comparison feeds the perf/W doubling-period parameter.
+gpus: [0]
+port: 8000
+server:
+  extra_args: ["--gpu-memory-utilization", "0.90", "--max-model-len", "8192"]
+  ready_timeout_s: 3600
+slo: {ttft_s: 2.0, tpot_s: 0.10}
+workload: {input_median: 512, input_max: 4096, output_median: 256, output_max: 1024}
+experiments:
+  - type: load
+    models: [Qwen/Qwen2.5-7B-Instruct]   # 24 GB+ GPU; use Qwen2.5-1.5B-Instruct on 16 GB
+    tp: [1]
+    caps: [1.0, 0.9, 0.8, 0.7, 0.6, 0.5]
+    loads: [{concurrency: 1}, {concurrency: 8}, {concurrency: 64}, {rate: 2.0}]
+    warmup_s: 120
+    duration_s: 300

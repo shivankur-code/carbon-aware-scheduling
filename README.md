@@ -15,12 +15,28 @@ should plan GPU and host lifetimes, spares and fleet mix as a result.**
 replaced quickly anyway. On clean grids a failure-oblivious plan keeps GPUs about 8–10
 years and misses its availability target badly unless spares are added.*
 
+**Second lever: power capping.** Running GPUs below their default power limit acts on
+four carbon terms at once: energy per token, the number of GPUs needed, wear-out (and so
+lifetime), and power headroom the grid can call on. `gpu_bench/` measures the power-cap
+curve on real GPUs. `experiments/derating.py` turns it into a joint
+(power cap, lifetime) optimum.
+
+![derating](docs/figures/derating.png)
+
 ## Quickstart
 
 ```bash
 pip install -e ".[dev]"
 pytest -q
 python experiments/pilot_lifetime.py      # -> docs/figures/pilot_lifetime.png
+python experiments/derating.py            # -> docs/figures/derating.png (uses GPU data if present)
+```
+
+On a GPU machine (see [`gpu_bench/README.md`](gpu_bench/README.md)):
+
+```bash
+bash scripts/setup_gpu_node.sh
+python -m gpu_bench.run_sweep configs/gpu/g0_smoke.yaml --quick
 ```
 
 ## Layout
@@ -28,11 +44,14 @@ python experiments/pilot_lifetime.py      # -> docs/figures/pilot_lifetime.png
 ```
 configs/        experiment configs (YAML, one per figure)
 src/calf/
-  models/       reliability.py (hazard, spares), lifetime.py (fleet carbon vs lifetime)
+  models/       reliability.py (hazard, spares), lifetime.py (fleet carbon vs lifetime),
+                derating.py (power cap -> throughput, power, temperature, aging)
   optimize/     provisioning MILP, epsilon-constraint Pareto, fuzzy/scenario (planned)
   simulate/     discrete-time fleet simulator (planned)
   data/         carbon-intensity, workload, hardware loaders (planned)
 experiments/    one script per figure
+gpu_bench/      vLLM + NVML measurement harness (power-cap sweeps, idle power, cold start, faults)
+data/measurements/gpu/  committed GPU measurement results
 docs/           research_plan.md, related_work.md, assumptions.md, figures/
 paper/          outline + references for paper generation
 ```

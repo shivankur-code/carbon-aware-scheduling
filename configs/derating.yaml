@@ -1,0 +1,11 @@
+# Joint (power cap, lifetime) optimization. Uses measured cap curves when present.
+measurements: data/measurements/gpu          # summary.csv files from gpu_bench
+measured_load: '{"concurrency": 64}'         # which load level defines the curve
+min_slo_attainment: 0.99                     # caps that miss the SLO are infeasible
+fleet:
+  weibull_scale_years: 8.0
+carbon_intensity_kg_per_kwh: {start: 0.01, stop: 0.70, num: 36}
+activation_energy_ev: [0.0, 0.3, 0.7]        # 0 = no thermal-aging effect (lower bound)
+output:
+  csv: results/derating.csv
+  figure: docs/figures/derating.png
