@@ -11,7 +11,7 @@ Uncertainty-Aware Lifetime Planning for LLM Inference Fleets
 4. **Planning under uncertainty:** fuzzy alpha-cut, scenario, chance-constrained; MILP and
    epsilon-constraint.
 5. **Methodology:** data sources, parameters (assumptions.md), baselines.
-6. **Results:** E1 phase diagram; E2 host vs GPU; E3 promised vs realized; E4 Pareto;
+6. **Results (current):** R1 recovery_spares.png; R2 fleet_design.png; R3 uncertainty_planning.png (see research_plan.md 'Results so far'). Earlier plan: E1 phase diagram; E2 host vs GPU; E3 promised vs realized; E4 Pareto;
    E5 sensitivity; E6 validation.
 7. **Discussion:** when Recycle is robust and when it is not; implications for operators
    and for carbon reporting; limitations.

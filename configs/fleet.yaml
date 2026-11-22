@@ -1,0 +1,22 @@
+# Shared fleet setup for fleet_design.py and uncertainty_planning.py.
+# Absolute throughput cancels in relative results; all ASSUMPTION values are listed in
+# docs/assumptions.md. Reliability inputs: Cui et al. SC'25 (H100 on Delta).
+gpu: {name: H100-class, mem_gb: 80, tput_tp1: 1000, active_kw: 0.45, idle_kw: 0.10,
+      embodied_kg: 1000, lifetime_y: 4}
+workloads:
+  - {name: 8B model, demand_tok_s: 400000, model_mem_gb: 16}
+  - {name: 70B model, demand_tok_s: 400000, model_mem_gb: 140}
+env: {error_rate: 7.5, mttr_h: 2.2, pue: 1.2, availability_target: 0.999}
+grids_kg_per_kwh: {low (hydro/nuclear): 0.03, mid: 0.25, high (coal-heavy): 0.60}
+recovery_hours_sweep: [0.0167, 0.0833, 0.25, 0.88, 2.2, 6, 24, 72]
+uncertainty:              # triangular fuzzy numbers (lo, mode, hi)
+  error_rate: [3.75, 7.5, 15]       # Delta H100 mode; x0.5..x2 ASSUMPTION
+  mttr_h: [0.0833, 2.2, 8]          # Delta: incidents 2 min..23 node-h; 2.2 h expected service
+  embodied_kg: [800, 1000, 1600]    # CarbonClarity-style right tail (mean-to-p95 up to 1.6x)
+  ci_factor: [0.7, 1.0, 1.3]        # grid-intensity forecast error, ASSUMPTION
+  alphas: [1.0, 0.75, 0.5, 0.25, 0.0]
+  scenarios: 4000
+  chance_level: 0.95
+  grid: mid
+  workload: 70B model
+  design: {tp: 4, clock: 0.39}

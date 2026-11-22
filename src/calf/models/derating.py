@@ -108,3 +108,19 @@ def joint_optimum(
             if tot < best.total_kg:
                 best = JointResult(float(c), float(L), tot)
     return best
+
+
+# SM clock locking during memory-bound LLM decode, from Ma et al., "The Illusion of Power
+# Capping in LLM Decode", PPAM 2026 (arXiv 2605.11999), one H200 + vLLM, ~4B models, <=4K
+# output tokens. "cap" here is the locked SM clock as a fraction of max (1980 MHz):
+#   1590 MHz (0.80): <0.1% throughput change, ~9% less power than 1980 MHz.
+#   780 MHz (0.39):  20-32% less decode energy (midpoint 26% used), ~1% throughput loss.
+# The paper does not report temperature, so temperatures are held equal: this curve makes
+# NO thermal-aging claim (Arrhenius factor = 1 regardless of Ea).
+CLOCKLOCK_DECODE_CURVE = CapCurve(
+    cap=(0.39, 0.80, 1.0),
+    rel_throughput=(0.99, 0.999, 1.0),
+    rel_power=(0.74, 1 / 1.09, 1.0),  # 0.74/0.99 -> ~25% less energy per token
+    temp_c=(70.0, 70.0, 70.0),
+    source="Ma et al. PPAM 2026 (clock locking, memory-bound decode)",
+)

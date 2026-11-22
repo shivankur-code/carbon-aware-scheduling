@@ -29,6 +29,13 @@ embodied carbon, are set mainly by **recovery time × failure blast radius**, no
 
 ![recovery](docs/figures/recovery_spares.png)
 
+**Planning under uncertainty:** sizing spares at most-likely failure rates misses a 99.9%
+availability target in 68% of plausible scenarios; a fuzzy alpha-cut plan fixes it for <2%
+more carbon. Clock locking (not power capping) is the largest single carbon lever (8–23%).
+
+![uncertainty](docs/figures/uncertainty_planning.png)
+![fleet](docs/figures/fleet_design.png)
+
 ## Quickstart
 
 ```bash
@@ -37,6 +44,8 @@ pytest -q
 python experiments/pilot_lifetime.py      # -> docs/figures/pilot_lifetime.png
 python experiments/derating.py            # -> docs/figures/derating.png (uses GPU data if present)
 python experiments/recovery_spares.py     # -> docs/figures/recovery_spares.png (sourced error rates)
+python experiments/fleet_design.py        # -> docs/figures/fleet_design.png
+python experiments/uncertainty_planning.py  # -> docs/figures/uncertainty_planning.png
 ```
 
 On a GPU machine (see [`gpu_bench/README.md`](gpu_bench/README.md)):
@@ -53,7 +62,8 @@ configs/        experiment configs (YAML, one per figure)
 src/calf/
   models/       reliability.py (hazard, spares), lifetime.py (fleet carbon vs lifetime),
                 derating.py (power cap -> throughput, power, temperature, aging)
-  optimize/     provisioning MILP, epsilon-constraint Pareto, fuzzy/scenario (planned)
+  optimize/     fleet.py (TP degree x clock x spares, exact enumeration + epsilon-constraint),
+                uncertainty.py (triangular fuzzy alpha-cuts, Monte Carlo scenarios)
   simulate/     discrete-time fleet simulator (planned)
   data/         carbon-intensity, workload, hardware loaders (planned)
 experiments/    one script per figure

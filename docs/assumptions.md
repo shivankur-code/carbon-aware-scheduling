@@ -24,3 +24,17 @@ used in sensitivity analysis. The pilot values are all placeholders.
 | Software-failure repair time | part of MTTR | ASSUMPTION → **measure with G3 coldstart/fault** | | `gpu_bench` |
 | Failure blast radius (pool granularity) | 64 GPUs, independent | ASSUMPTION → **G2**: one failure takes out a whole TP group | TP 1–8 | `gpu_bench` |
 | Arrhenius activation energy Ea | 0, 0.3, 0.7 eV | ASSUMPTION (cannot be measured in hours) | 0–1.0 eV; 0 = no thermal aging | Reliability-physics literature (find and verify sources) |
+
+## Fleet-design and uncertainty experiments (`configs/fleet.yaml`)
+
+| Parameter | Value | Status | Notes |
+|---|---|---|---|
+| Per-GPU efficiency vs tensor-parallel degree | TP1 1.0, TP2 0.92, TP4 0.85, TP8 0.75 | ASSUMPTION | Replaced by a break-even analysis: we report the efficiency gain a bigger group *needs*, not which group wins |
+| KV cache + activations share of weights | 0.3 | ASSUMPTION | Sets minimum TP (70B fp16 on 80 GB GPUs → TP ≥ 4) |
+| Decode throughput per GPU at TP1 | 1000 tok/s | ASSUMPTION | Cancels in all relative results |
+| Hardware amortization lifetime | 4 years | ASSUMPTION | EcoServe's symmetric baseline is 4 y (summary; verify in PDF) |
+| Clock-lock curve | 780 MHz: 0.99 throughput, 0.74 power; 1590 MHz: ~1.0 throughput, 0.92 power | Sourced (memory-bound decode, H200) | Ma et al. PPAM 2026; other GPU generations may differ |
+| Error-rate uncertainty | triangular (3.75, 7.5, 15) per GPU-year | Mode sourced (Delta H100), range ASSUMPTION (x0.5–x2) | |
+| Recovery-time uncertainty | triangular (5 min, 2.2 h, 8 h) | Range informed by Delta incidents (2 min – 23 node-hours); shape ASSUMPTION | 2.2 h is Delta's *expected* H100 service time |
+| Embodied-carbon uncertainty | triangular (800, 1000, 1600) kg | Right-tail shape from CarbonClarity (mean-to-p95 up to 1.6x); level ASSUMPTION | |
+| Grid-intensity forecast error | x(0.7, 1.0, 1.3) | ASSUMPTION | |

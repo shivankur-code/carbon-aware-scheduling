@@ -41,6 +41,40 @@ smaller failure domains) is a carbon lever**, and it interacts with tensor-paral
 (bigger groups → better throughput, bigger blast radius). This builds directly on the
 operator-side expertise the project is meant to showcase (fault tolerance, node lifecycle).
 
+### Results so far (sourced reliability inputs; remaining assumptions in `docs/assumptions.md`)
+
+**R1. Recovery time × blast radius sets the spare overhead** (`experiments/recovery_spares.py`).
+See the table above. At Delta's measured service times (0.9–2.2 h) the overhead is modest
+(about 1–5% of a 500-GPU fleet). It becomes large only at day-scale recovery or with 8-GPU
+failure domains.
+
+**R2. Fleet design** (`experiments/fleet_design.py`, `docs/figures/fleet_design.png`), 70B model,
+~500 H100-class GPUs:
+* **Clock locking** (Ma et al. curve) cuts total annual carbon by **8% (low-carbon grid), 20%
+  (mid) and 23% (high)**, the largest single lever in the model.
+* **Spares are a small slice** of total carbon at measured recovery times (≈4% of GPUs).
+* **Blast-radius break-even:** an 8-GPU replica must be **2–4% more efficient per GPU** than a
+  4-GPU replica to break even at hour-scale recovery, rising to **16–32% at 1–3 days on a
+  low-carbon grid** (8.5–16% mid, 6.5–14% high). Reliability matters most where embodied carbon
+  dominates: clean grids.
+
+**R3. Promised vs realized under uncertainty** (`experiments/uncertainty_planning.py`,
+`docs/figures/uncertainty_planning.png`), 70B fleet, mid grid, 4,000 scenarios:
+* The **deterministic plan** (spares sized at most-likely error rate and recovery time)
+  promises 99.96% availability but **misses the 99.9% target in 68% of scenarios**; its
+  worst-5% availability is 87%.
+* A **fuzzy alpha = 0.5 plan** (same spare count as a 95% scenario chance constraint) misses in
+  **4.7%** of scenarios for **+1.9% annual carbon**; alpha = 0.25 misses in 0.05% for +3.1%.
+* Mean realized carbon is ~3% above the promised value for every plan because of the
+  embodied-carbon right tail.
+
+**Candidate headline for the paper/email (all numbers reproducible from the repo):**
+> "Using field reliability data from 1,056 A100/H100 GPUs, we find the carbon cost of keeping
+> an LLM inference fleet available is set by recovery time and failure blast radius, not
+> hardware age. A plan sized at most-likely failure rates misses its 99.9% availability
+> target in 68% of plausible scenarios; a fuzzy (alpha = 0.5) plan fixes this for under 2%
+> extra carbon, while clock locking saves 8–23%."
+
 ### Revised research questions (supersede §3 where they differ)
 * **RQ1′:** How much embodied carbon does reliability cost in an LLM inference fleet, as a
   function of error rate, recovery time and blast radius (tensor-parallel group size)?
