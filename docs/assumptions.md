@@ -10,15 +10,16 @@ used in sensitivity analysis. The pilot values are all placeholders.
 | Spare idle power | 0.10 kW | ASSUMPTION | 0–0.2 | Spares may be powered off (cold), which trades availability against energy |
 | PUE | 1.2 | ASSUMPTION | 1.1–1.5 | Public hyperscaler sustainability reports |
 | Perf/W doubling period | 3.5 y | ASSUMPTION (EcoServe reportedly uses 3.5 y; verify) | 2–5 y | Verify in EcoServe PDF; MLPerf generations |
-| Weibull shape k | 2.0 | ASSUMPTION | 1 (no wear-out) – 3 | Public large-cluster reliability studies |
-| Weibull scale | 5/8/12 y | ASSUMPTION | 4–15 y | As above |
-| MTTR | 72 h | ASSUMPTION | 24 h – 30 d | Should grow with age (parts scarcity) |
+| Weibull shape k | 2.0 | **Weakened by evidence.** Cui et al. (SC'25) find the GPU hazard rate "exhibits no clear temporal trends during the operational period" (A100 over 2.5 y, calendar time, not age-stratified). So k ≈ 1 is the data-backed default for years 0–2.5; wear-out beyond that is unobserved. | 1 – 3; k > 1 only for ages > 2.5 y | Cui et al. 2025 [V] |
+| Weibull scale | 5/8/12 y | ASSUMPTION for *hard* (replacement) failures. Field replacements are rare: 4 A100s over ~1,098 GPU-years (0.36%/y) and 2 H100s over ~243 GPU-years (0.82%/y), derived from Cui et al. | 0.2–10 %/y | Cui et al. 2025 [V, derived] |
+| **Critical GPU error rate** (interrupts the node) | — | **Sourced:** 13.5 errors per A100 GPU-year (14,821 / 1,098) and 7.5 per H100 GPU-year (1,821 / 243), derived from Cui et al. Table 1 / Sec 4.1. Upper end: assumes every critical error interrupts its node (paper's footnote 14). | 1–15 /GPU-y | Cui et al. 2025 [V, derived] |
+| MTTR | 72 h | **Replaced:** expected node service time 0.88 h (A100) and 2.2 h (H100); individual incidents range from 2 min to 23 node-hours. 72 h was far too pessimistic for the dominant (soft) errors. | 1 min – 72 h | Cui et al. 2025 Sec 5.4 [V] |
 | Unrepairable failure share | 0.3 | ASSUMPTION | 0.1–0.6 | |
 | Replacement part embodied share | 0.5 | ASSUMPTION | 0.2–1.0 | |
 | Pool size | 64 GPUs | ASSUMPTION | 8–512 | Deployment granularity |
 | Availability target | 99.9% | ASSUMPTION | 99–99.99% | SLO practice |
 | Independent failures | yes | ASSUMPTION (known false) | beta-binomial correlation | Rack/power-domain correlation is planned |
-| Power-cap curve (throughput, power, temperature vs cap) | placeholder `PLACEHOLDER_CURVE` | ASSUMPTION → **measure with G1** | caps 50–100% | `gpu_bench` |
+| Power-cap curve (throughput, power, temperature vs cap) | placeholder `PLACEHOLDER_CURVE` | **Evidence says caps rarely bind in decode.** On an H200 with vLLM, memory-bound decode draws 147–292 W of a 700 W rating, and throughput moves <3% across 280–700 W caps. Caps engage only for large batch × long generation (up to 44% throughput loss at 280 W). **SM clock locking** saves 20–32% of decode energy at ≤1% throughput loss (780 MHz, ≤4K output tokens). So the lever to model is clock/DVFS, not the cap. | clock 0.4–1.0 of max | Ma et al., PPAM 2026 [V]; our G1 harness can sweep clocks too |
 | Spare idle power | 0.10 kW | ASSUMPTION → **measure with G3 idle** | | `gpu_bench` |
 | Software-failure repair time | part of MTTR | ASSUMPTION → **measure with G3 coldstart/fault** | | `gpu_bench` |
 | Failure blast radius (pool granularity) | 64 GPUs, independent | ASSUMPTION → **G2**: one failure takes out a whole TP group | TP 1–8 | `gpu_bench` |

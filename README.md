@@ -23,6 +23,12 @@ curve on real GPUs. `experiments/derating.py` turns it into a joint
 
 ![derating](docs/figures/derating.png)
 
+**Evidence-based headline (in progress):** using published field data (NCSA Delta A100/H100
+error rates and recovery times), the extra GPUs needed for 99.9% availability, and so their
+embodied carbon, are set mainly by **recovery time × failure blast radius**, not hardware age.
+
+![recovery](docs/figures/recovery_spares.png)
+
 ## Quickstart
 
 ```bash
@@ -30,6 +36,7 @@ pip install -e ".[dev]"
 pytest -q
 python experiments/pilot_lifetime.py      # -> docs/figures/pilot_lifetime.png
 python experiments/derating.py            # -> docs/figures/derating.png (uses GPU data if present)
+python experiments/recovery_spares.py     # -> docs/figures/recovery_spares.png (sourced error rates)
 ```
 
 On a GPU machine (see [`gpu_bench/README.md`](gpu_bench/README.md)):

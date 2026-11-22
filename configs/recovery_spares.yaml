@@ -1,0 +1,15 @@
+# Spare-GPU overhead vs recovery time and failure blast radius.
+# Error rates derived from Cui et al., SC'25 (Delta: 448 A100 over 895 d, 608 H100 over 146 d).
+# Every critical error is assumed to interrupt its node (the paper's own footnote-14 assumption),
+# so these are upper-end rates.
+fleet_gpus: 512
+availability_target: 0.999
+error_rates_per_gpu_year:
+  A100 (Delta): 13.5    # 14,821 critical errors / 1,098 GPU-years
+  H100 (Delta): 7.5     # 1,821 critical errors / 243 GPU-years
+blast_radius: [1, 4, 8]  # GPUs lost per error: 1 GPU, 4-GPU node, 8-way tensor-parallel group
+recovery_hours: {start: 0.0167, stop: 72, num: 60}   # 1 min .. 3 days, log-spaced
+reference_points_h: [0.0833, 0.88, 2.2, 24]          # 5 min; Delta A100 / H100 node service; 1 day
+output:
+  csv: results/recovery_spares.csv
+  figure: docs/figures/recovery_spares.png

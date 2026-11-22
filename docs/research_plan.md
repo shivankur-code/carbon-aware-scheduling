@@ -9,6 +9,53 @@ carbon, and every input (embodied carbon, grid intensity, failure rates) is unce
 then show that **one operational knob, the GPU power cap, acts on all four carbon terms at
 once**, with the effects measured on real GPUs.
 
+## Evidence update (2026-11-22): what published data changed
+
+Checking our assumptions against field data overturned two of them and sharpened the thesis.
+
+| Assumption | What the evidence says | Consequence |
+|---|---|---|
+| GPUs wear out (Weibull k = 2), so old GPUs need more spares | Delta (Cui et al., SC'25): **no clear temporal trend in hazard rate** over 2.5 years of A100 operation; hard replacements are rare (~0.4–0.8 %/year). Newer H100s have **3.2x lower** per-GPU MTBE for uncorrectable memory errors than A100s. | Wear-out is not the main reliability cost in years 0–2.5, and "newer = more reliable" is false. Keep wear-out only as a swept scenario for ages beyond the data. |
+| Repairs take days (MTTR 72 h) | The dominant errors are soft and fixed by a reset/reboot: expected node service **0.88 h (A100), 2.2 h (H100)**; ~13.5 / 7.5 critical errors per GPU-year. | Spare capacity is driven by **error rate × recovery time × blast radius**, not by hardware age. |
+| Power caps are a strong lever | Ma et al. (PPAM 2026): LLM decode draws **147–292 W of 700 W**, so caps rarely bind; **clock locking** saves 20–32% decode energy at ≤1% throughput loss. | Model the lever as clock/DVFS. Power caps matter only for long, large-batch generation. |
+
+### Sharpened thesis
+
+> **The embodied-carbon cost of reliability in LLM serving is set by how fast you recover and
+> how much a single error takes down, not by how old the hardware is.**
+
+`experiments/recovery_spares.py` (`docs/figures/recovery_spares.png`), using Delta's error rates:
+to keep a 512-GPU fleet at 99.9% availability,
+
+| Recovery time | Blast radius 1 GPU | 4-GPU node | 8-GPU tensor-parallel group |
+|---|---|---|---|
+| 5 min | ~0.2% extra GPUs | 0.6–1.6% | 1.6–3.1% |
+| 0.88–2.2 h (Delta's measured service times) | 0.6–1.4% | 2.3–5.5% | 4.7–10.9% |
+| 1 day | 4–7% | 17–27% | 36–56% |
+
+(Ranges span H100 and A100 error rates. Upper-end rates: every critical error is assumed to
+interrupt its node, as Delta's own availability analysis assumes.)
+
+Spare GPUs carry full embodied carbon, so **recovery engineering (fast restart, hot spares,
+smaller failure domains) is a carbon lever**, and it interacts with tensor-parallel degree
+(bigger groups → better throughput, bigger blast radius). This builds directly on the
+operator-side expertise the project is meant to showcase (fault tolerance, node lifecycle).
+
+### Revised research questions (supersede §3 where they differ)
+* **RQ1′:** How much embodied carbon does reliability cost in an LLM inference fleet, as a
+  function of error rate, recovery time and blast radius (tensor-parallel group size)?
+* **RQ2′:** When does lifetime extension (EcoServe's Recycle) stay carbon-positive, given
+  that observed hazard is flat early but unknown later? Treat late-life hazard as deep
+  uncertainty and report the break-even late-life failure rate.
+* **RQ3′ (uncertainty, unchanged):** promised vs realized savings under uncertain embodied
+  carbon, grid intensity and error rates (fuzzy / scenario methods).
+* **RQ4′:** Joint provisioning: tensor-parallel degree × spares × clock level × lifetime.
+
+### What the GPU runs are now for
+Optional validation, not the foundation: (a) measured **restart / recovery time** of a vLLM
+server (G3) directly sets the x-axis of the headline figure; (b) a **clock-lock sweep**
+(replacing the power-cap sweep) to confirm Ma et al. on another GPU generation.
+
 ## 0. The core idea: one knob, four carbon effects
 
 | Effect of lowering the power cap | Carbon term | Measured or modeled |
