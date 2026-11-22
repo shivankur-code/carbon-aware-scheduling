@@ -4,7 +4,7 @@
 exec > /var/log/calf-bootstrap.log 2>&1
 set -x
 export HOME=/root
-CONFIG="__CONFIG__"; SAS_URL="__SAS_URL__"; BRANCH="__BRANCH__"
+CONFIG="__CONFIG__"; SAS_URL="__SAS_URL__"; BRANCH="__BRANCH__"; VLLM_SPEC="__VLLM_SPEC__"
 upload() {  # $1 = blob name, $2 = file
   curl -sS -X PUT -H "x-ms-blob-type: BlockBlob" --data-binary @"$2" \
     "${SAS_URL%%\?*}/$1?${SAS_URL#*\?}"
@@ -17,7 +17,7 @@ cd /opt/calf
 curl -LsSf https://astral.sh/uv/install.sh | sh && export PATH="$HOME/.local/bin:$PATH"
 uv venv -p 3.12 .venv && . .venv/bin/activate
 status "installing vllm"
-uv pip install vllm nvidia-ml-py aiohttp pyyaml && uv pip install -e . || { status "FAILED: pip"; upload bootstrap.log /var/log/calf-bootstrap.log; exit 1; }
+uv pip install "$VLLM_SPEC" nvidia-ml-py aiohttp pyyaml && uv pip install -e . || { status "FAILED: pip"; upload bootstrap.log /var/log/calf-bootstrap.log; exit 1; }
 mkdir -p data/measurements && nvidia-smi -q > data/measurements/nvidia-smi-q.txt
 ( while true; do sleep 600; tar czf /opt/partial.tgz data/measurements --exclude=server.log \
     && upload partial.tgz /opt/partial.tgz; upload bootstrap.log /var/log/calf-bootstrap.log; done ) &

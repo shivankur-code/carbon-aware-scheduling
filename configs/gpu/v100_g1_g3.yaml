@@ -1,0 +1,30 @@
+# V100 16 GB (Azure NC6s_v3, spot): 2017 generation, power limit 100-250 W -> caps down to 40%.
+# No bf16 -> fp16. 3B model as the main curve; 1.5B shared with T4 and newer GPUs.
+gpus: [0]
+port: 8000
+server:
+  extra_args: ["--gpu-memory-utilization", "0.90", "--max-model-len", "4096", "--dtype", "half"]
+  ready_timeout_s: 3600
+slo: {ttft_s: 2.0, tpot_s: 0.10}
+workload: {input_median: 512, input_max: 2048, output_median: 256, output_max: 1024}
+experiments:
+  - type: load
+    name: g1_3b
+    models: [Qwen/Qwen2.5-3B-Instruct]
+    tp: [1]
+    caps: [1.0, 0.85, 0.7, 0.55, 0.4]
+    loads: [{concurrency: 1}, {concurrency: 16}, {concurrency: 64}]
+    warmup_s: 90
+    duration_s: 240
+  - {type: idle, model: Qwen/Qwen2.5-3B-Instruct, duration_s: 120, settle_s: 30}
+  - {type: coldstart, model: Qwen/Qwen2.5-3B-Instruct, repeats: 3}
+  - {type: fault, model: Qwen/Qwen2.5-3B-Instruct, kill_at_s: 120, duration_s: 420,
+     load: {rate: 2.0}}
+  - type: load
+    name: g1_1p5b
+    models: [Qwen/Qwen2.5-1.5B-Instruct]
+    tp: [1]
+    caps: [1.0, 0.7, 0.4]
+    loads: [{concurrency: 1}, {concurrency: 16}, {concurrency: 64}]
+    warmup_s: 90
+    duration_s: 240
