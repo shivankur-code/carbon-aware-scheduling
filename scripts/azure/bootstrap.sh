@@ -4,10 +4,10 @@
 exec > /var/log/calf-bootstrap.log 2>&1
 set -x
 export HOME=/root
-CONFIG="__CONFIG__"; SAS_URL="__SAS_URL__"; BRANCH="__BRANCH__"; VLLM_SPEC="__VLLM_SPEC__"
+CONFIG="__CONFIG__"; SAS_URL="__SAS_URL__"; BRANCH="__BRANCH__"; VLLM_SPEC="__VLLM_SPEC__"; PREFIX="__NAME__"
 upload() {  # $1 = blob name, $2 = file
   curl -sS -X PUT -H "x-ms-blob-type: BlockBlob" --data-binary @"$2" \
-    "${SAS_URL%%\?*}/$1?${SAS_URL#*\?}"
+    "${SAS_URL%%\?*}/$PREFIX/$1?${SAS_URL#*\?}"
 }
 status() { echo "$(date -u +%FT%TZ) $*" > /opt/status.txt; upload status.txt /opt/status.txt; }
 status "booted"
