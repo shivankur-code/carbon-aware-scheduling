@@ -68,12 +68,25 @@ failure domains.
 * Mean realized carbon is ~3% above the promised value for every plan because of the
   embodied-carbon right tail.
 
+**R4. Sensitivity of R3 to the assumed ranges** (`experiments/uncertainty_sensitivity.py`,
+`docs/figures/uncertainty_sensitivity.png`), error-rate range from x1.25 to x3 around the mode
+and recovery-time upper end from 4 h to 24 h, for Delta's H100 and A100 modes:
+* The deterministic plan misses 99.9% in **27–91% (H100) / 75–97% (A100)** of scenarios; it
+  never drops below 27% even with error rates known to within ±25%.
+* The driver is the **right skew of recovery time**: most errors clear fast, a few take hours,
+  so the most-likely value sits below the mean and planning at it under-provisions spares.
+  Delta's incidents (2 min to 23 node-hours) show this skew is real.
+* A 95% chance-constrained plan costs **+0.4–7.9% (H100) / +1.9–14% (A100)** annual carbon.
+* Caveat: triangular distributions are a modelling choice; a heavier-tailed recovery-time
+  distribution would strengthen, not weaken, the effect.
+
 **Candidate headline for the paper/email (all numbers reproducible from the repo):**
 > "Using field reliability data from 1,056 A100/H100 GPUs, we find the carbon cost of keeping
 > an LLM inference fleet available is set by recovery time and failure blast radius, not
-> hardware age. A plan sized at most-likely failure rates misses its 99.9% availability
-> target in 68% of plausible scenarios; a fuzzy (alpha = 0.5) plan fixes this for under 2%
-> extra carbon, while clock locking saves 8–23%."
+> hardware age. Because recovery times are right-skewed, a plan sized at most-likely values misses its
+> 99.9% availability target in 27–97% of plausible scenarios (68% in our base case); an
+> uncertainty-aware plan fixes this for 0.4–14% extra carbon (1.9% in the base case), while
+> clock locking saves 8–23%."
 
 ### Revised research questions (supersede §3 where they differ)
 * **RQ1′:** How much embodied carbon does reliability cost in an LLM inference fleet, as a

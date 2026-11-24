@@ -29,12 +29,13 @@ embodied carbon, are set mainly by **recovery time × failure blast radius**, no
 
 ![recovery](docs/figures/recovery_spares.png)
 
-**Planning under uncertainty:** sizing spares at most-likely failure rates misses a 99.9%
-availability target in 68% of plausible scenarios; a fuzzy alpha-cut plan fixes it for <2%
-more carbon. Clock locking (not power capping) is the largest single carbon lever (8–23%).
+**Planning under uncertainty:** because recovery times are right-skewed, sizing spares at
+most-likely values misses a 99.9% availability target in 27–97% of plausible scenarios (68%
+in the base case); an uncertainty-aware plan fixes it for 0.4–14% more carbon (1.9% base). Clock locking (not power capping) is the largest single carbon lever (8–23%).
 
 ![uncertainty](docs/figures/uncertainty_planning.png)
 ![fleet](docs/figures/fleet_design.png)
+![sensitivity](docs/figures/uncertainty_sensitivity.png)
 
 ## Quickstart
 
@@ -46,6 +47,7 @@ python experiments/derating.py            # -> docs/figures/derating.png (uses G
 python experiments/recovery_spares.py     # -> docs/figures/recovery_spares.png (sourced error rates)
 python experiments/fleet_design.py        # -> docs/figures/fleet_design.png
 python experiments/uncertainty_planning.py  # -> docs/figures/uncertainty_planning.png
+python experiments/uncertainty_sensitivity.py  # -> docs/figures/uncertainty_sensitivity.png
 ```
 
 On a GPU machine (see [`gpu_bench/README.md`](gpu_bench/README.md)):
