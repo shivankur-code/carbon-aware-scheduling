@@ -51,7 +51,8 @@ failure domains.
 **R2. Fleet design** (`experiments/fleet_design.py`, `docs/figures/fleet_design.png`), 70B model,
 ~500 H100-class GPUs:
 * **Clock locking** (Ma et al. curve) cuts total annual carbon by **8% (low-carbon grid), 20%
-  (mid) and 23% (high)**, the largest single lever in the model.
+  (mid) and 23% (high)**, the largest single lever in the model. With EcoServe's lower
+  embodied values (~220 kg/GPU) it is **18% / 24% / 25%**.
 * **Spares are a small slice** of total carbon at measured recovery times (≈4% of GPUs).
 * **Blast-radius break-even:** an 8-GPU replica must be **2–4% more efficient per GPU** than a
   4-GPU replica to break even at hour-scale recovery, rising to **16–32% at 1–3 days on a
@@ -86,7 +87,7 @@ and recovery-time upper end from 4 h to 24 h, for Delta's H100 and A100 modes:
 > hardware age. Because recovery times are right-skewed, a plan sized at most-likely values misses its
 > 99.9% availability target in 27–97% of plausible scenarios (68% in our base case); an
 > uncertainty-aware plan fixes this for 0.4–14% extra carbon (1.9% in the base case), while
-> clock locking saves 8–23%."
+> clock locking saves 8–25%."
 
 ### Revised research questions (supersede §3 where they differ)
 * **RQ1′:** How much embodied carbon does reliability cost in an LLM inference fleet, as a
@@ -125,7 +126,7 @@ aging is real (Ea > 0). The measured curve decides how large each regime is.
 
 | Prior work | What it does | What it leaves open (our entry point) |
 |---|---|---|
-| **EcoServe** (Li et al., arXiv 2502.05043, 2025) | Four pillars for carbon-aware LLM inference. *Reuse* runs offline work on idle host CPUs. *Rightsize* chooses GPU type and count with an ILP. *Reduce* trims host DRAM and SSD. *Recycle* uses **asymmetric lifetimes**: hosts kept longer (about 9 y), GPUs replaced sooner (about 3 y). Embodied carbon is amortized linearly over lifetime. | The lifetimes are chosen **deterministically**. We found no failure, spare-capacity or availability model in the part of the paper read so far, and grid intensity is handled as fixed sensitivity points, not a distribution. **(Verify against the PDF before stating this publicly.)** |
+| **EcoServe** (Li et al., arXiv 2502.05043, 2025) | Four pillars for carbon-aware LLM inference. *Reuse* runs offline work on idle host CPUs. *Rightsize* chooses GPU type and count with an ILP. *Reduce* trims host DRAM and SSD. *Recycle* uses **asymmetric lifetimes**: hosts kept longer (about 9 y), GPUs replaced sooner (about 3 y). Embodied carbon is amortized linearly over lifetime. | The lifetimes are chosen **deterministically**. We found no failure, spare-capacity or availability model in the part of the paper read so far, and grid intensity is handled as fixed sensitivity points, not a distribution. **(Verified against the full arXiv HTML v2, 2026-11-24: no failure, spare, availability or uncertainty model; Sec 4.1.4 covers component aging only.)** |
 | **CarbonClarity** (Chen et al., arXiv 2507.01145, 2025) | Embodied carbon as a probability distribution; mean-to-p95 gap up to 1.6x at 7 nm. | The uncertainty is not carried into *fleet operating decisions* such as lifetime, spares or provisioning. |
 | ACT, Fair-CO2, CORDOBA, Carbon Explorer (Gupta et al.) | Carbon modeling, attribution and optimization frameworks | Hardware treated as always available |
 

@@ -4,16 +4,31 @@ Status legend: **[V]** checked against the arXiv abstract or HTML; **[PDF]** sti
 verified against the full paper before citing.
 
 ## EcoServe: Designing Carbon-Aware AI Inference Systems
-Y. Li, Z. Hu, E. Choukse, R. Fonseca, G. E. Suh, U. Gupta. arXiv 2502.05043 (v2, Mar 2025). [V]
-* Abstract: up to 47% lower carbon vs performance-, energy- and cost-optimized design
-  points while meeting SLOs. [V]
-* 4R pillars: Reuse (offline inference on idle host CPUs), Rightsize (GPU type/count),
-  Reduce (trim host DRAM/SSD), Recycle (asymmetric host/GPU lifetimes). [V for definitions; PDF for numbers]
-* Per-task carbon: (P_host + P_gpu)·t·CI + (CF_host_emb + CF_gpu_emb)·t/LT, i.e. linear
-  amortization over lifetime LT. [V]
-* ILP for provisioning; Recycle reportedly hosts about 9 y, GPUs about 3 y, about 16%
-  saving over 10 y. [PDF]
-* No failure, spare-capacity or availability model found in the part read so far. [PDF: confirm]
+Y. Li, Z. Hu, E. Choukse, R. Fonseca, G. E. Suh, U. Gupta. arXiv 2502.05043 (v2, 15 Mar 2025).
+No venue stated in the arXiv text. **[V: full HTML v2 read, Sections 1–8]**
+* Abstract: up to 47% lower carbon vs performance-, energy- and cost-optimized design points
+  (Sec 6.1 also calls 47% the *average*; Fig 15: "up to 47% ... at comparable performance").
+* 4R: **Reuse** = offline/batch inference on idle host CPUs (not old GPUs); **Rightsize** = GPU
+  type/count per prompt/decode slice; **Reduce** = trim host DRAM/SSD; **Recycle** = asymmetric
+  lifetimes.
+* Per-strategy savings: Intro says ~29/25/34/41% (reuse/rightsize/reduce/recycle); Sec 6.1 gives
+  smaller ranges (reduce 12.4–28.6%, rightsize 15.2–30.3%, reuse up to 25.4%, recycle ~16.8%).
+  Combined: 1.4–2.2x total-carbon reduction (Intro). Cite Sec 6.1 numbers to be safe.
+* Recycle (Sec 6.5): baseline upgrades host and GPU every 4 y; EcoServe upgrades hosts every
+  9 y and GPUs every 3 y; ~16% cumulative saving over 10 y. Baseline assumes 800 kgCO2e per host,
+  120 kgCO2e per GPU, 600 kgCO2e/y operational (no source given). GPU energy efficiency assumed
+  to double every 3.5 y (citing Sun et al. 2019).
+* Carbon model (Sec 3): CF = (P_host + P_gpu)·t·CI + (CF_emb,host + CF_emb,gpu)·t/LT (linear
+  amortization). Component embodied values from Dell R740 LCA, ACT, TechInsights (Table 1).
+* Optimizer: periodically triggered ILP in CVXpy; binary slice-to-GPU-type assignment, integer
+  GPU counts, CPU cores/memory per slice; objective (1−α)·cost + α·carbon (α = 1 by default);
+  TTFT/TPOT SLO constraints.
+* Grids: 17 / 261 / 501 gCO2/kWh (Sweden / California / Midcontinent), from WattTime and GreenSKU.
+* **Reliability:** Sec 4.1.4 studies *component aging* (CPU aging via a confidential model,
+  DRAM error rates, SSD wear) to justify long host lifetimes. **No hardware failure rates,
+  spare capacity, availability, or uncertainty** (grid intensity, demand, embodied carbon) are
+  modelled. Searches for fault/spare/MTBF/redundancy/uncertain: no hits.
+* No limitations section; notes Reuse may not suit short-context large-model decode.
 
 ## CarbonClarity: Understanding and Addressing Uncertainty in Embodied Carbon for Sustainable Computing
 X. Chen, L. Han, A. Bhagavathula, U. Gupta. arXiv 2507.01145 (v2, Jan 2026); linked DOI

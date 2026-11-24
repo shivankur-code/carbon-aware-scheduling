@@ -31,7 +31,7 @@ embodied carbon, are set mainly by **recovery time × failure blast radius**, no
 
 **Planning under uncertainty:** because recovery times are right-skewed, sizing spares at
 most-likely values misses a 99.9% availability target in 27–97% of plausible scenarios (68%
-in the base case); an uncertainty-aware plan fixes it for 0.4–14% more carbon (1.9% base). Clock locking (not power capping) is the largest single carbon lever (8–23%).
+in the base case); an uncertainty-aware plan fixes it for 0.4–14% more carbon (1.9% base). Clock locking (not power capping) is the largest single carbon lever (8–25%).
 
 ![uncertainty](docs/figures/uncertainty_planning.png)
 ![fleet](docs/figures/fleet_design.png)
